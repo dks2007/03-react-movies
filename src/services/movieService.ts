@@ -1,19 +1,26 @@
-export const fetchMovies = async (query: string): Promise<Movie[]> => {
-  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
-  
+import type { Movie } from '../types/movie';
+
+interface TMDBResponse {
+  results: Movie[];
+  total_results: number;
+  total_pages: number;
+  page: number;
+}
+
+export async function fetchMovies(query: string): Promise<Movie[]> {
+  const token = import.meta.env.VITE_TMDB_TOKEN;
+
+  const url = `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1&query=${encodeURIComponent(query)}`;
   const options = {
     method: 'GET',
     headers: {
       accept: 'application/json',
-      Authorization: `Bearer ${import.meta.env.VITE_TMDB_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${token}`,
     },
   };
 
   const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  
-  const data = await response.json();
+  const data: TMDBResponse = await response.json();
+
   return data.results;
-};
+}

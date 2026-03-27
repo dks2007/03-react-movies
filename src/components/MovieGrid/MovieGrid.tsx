@@ -1,17 +1,15 @@
-import type { Movie } from "../../types/movie";
-import css from "./MovieGrid.module.css";
+import type { Movie } from '../../types/movie';
+import css from './MovieGrid.module.css';
 
 interface MovieGridProps {
   movies: Movie[];
   onSelect: (movie: Movie) => void;
 }
 
-export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
-  const getPosterUrl = (posterPath: string | null) =>
-    posterPath
-      ? `https://image.tmdb.org/t/p/w500${posterPath}`
-      : "https://via.placeholder.com/500x750?text=No+Image";
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const PLACEHOLDER = 'https://placehold.co/500x750?text=No+Image';
 
+export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
   return (
     <ul className={css.grid}>
       {movies.map((movie) => (
@@ -19,8 +17,13 @@ export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
           <div className={css.card} onClick={() => onSelect(movie)}>
             <img
               className={css.image}
-              src={getPosterUrl(movie.poster_path)}
+              src={
+                movie.poster_path
+                  ? `${IMAGE_BASE_URL}${movie.poster_path}`
+                  : PLACEHOLDER
+              }
               alt={movie.title}
+              loading="lazy"
             />
             <h2 className={css.title}>{movie.title}</h2>
           </div>
