@@ -15,14 +15,9 @@ interface TMDBRequestParams {
   query: string;
 }
 
-interface TMDBRequestHeaders {
-  accept: string;
-  Authorization: string;
-}
-
 interface TMDBRequestConfig {
   params: TMDBRequestParams;
-  headers: TMDBRequestHeaders;
+  headers: Record<string, string>;
 }
 
 export async function fetchMovies(query: string): Promise<Movie[]> {
