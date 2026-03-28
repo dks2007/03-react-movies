@@ -5,8 +5,8 @@ import { fetchMovies } from '../../services/movieService';
 import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import Loader from '../Loader/Loader';
-import ErrorMessage from '../ErrorMessage/ErrorMessages';
 import MovieModal from '../MovieModal/MovieModal';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import styles from './App.module.css';
 
 export default function App() {
@@ -16,20 +16,24 @@ export default function App() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const handleSearch = async (query: string) => {
+    console.log('[App] Searching:', query);
     setMovies([]);
     setIsError(false);
     setIsLoading(true);
 
     try {
       const results = await fetchMovies(query);
+      console.log('[App] fetchMovies results:', results);
 
       if (results.length === 0) {
         toast.error('No movies found for your request.');
       }
 
       setMovies(results);
-    } catch {
+    } catch (error) {
+      console.error('[App] fetchMovies error:', error);
       setIsError(true);
+      toast.error('Something went wrong while loading movies.');
     } finally {
       setIsLoading(false);
     }

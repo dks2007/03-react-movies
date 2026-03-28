@@ -15,6 +15,9 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
     document.body.classList.add('modal-open');
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -25,6 +28,7 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
 
     return () => {
       document.body.classList.remove('modal-open');
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose]);

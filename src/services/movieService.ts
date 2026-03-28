@@ -1,3 +1,4 @@
+import axios from 'axios';
 import type { Movie } from '../types/movie';
 
 interface TMDBResponse {
@@ -8,19 +9,41 @@ interface TMDBResponse {
 }
 
 export async function fetchMovies(query: string): Promise<Movie[]> {
-  const token = import.meta.env.VITE_TMDB_TOKEN;
+  const tmdbApiKey = import.meta.env.VITE_TMDB_API_KEY;
+  const tmdbAccessToken = import.meta.env.VITE_TMDB_TOKEN_API_KEY;
 
-  const url = `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1&query=${encodeURIComponent(query)}`;
-  const options = {
-    method: 'GET',
+  const requestOptions: { params?: Record<string, any>; headers: Record<string, string> } = {
     headers: {
       accept: 'application/json',
-      Authorization: `Bearer ${token}`,
     },
   };
 
-  const response = await fetch(url, options);
-  const data: TMDBResponse = await response.json();
+  if (tmdbApiKey) {
+    requestOptions.params = {
+      api_key: tmdbApiKey,
+      include_adult: false,
+      language: 'en-US',
+      page: 1,
+      query,
+    };
+  } else if (tmdbAccessToken) {
+    requestOptions.headers.Authorization = `Bearer ${tmdbAccessToken}`;
+    requestOptions.params = {
+      include_adult: false,
+      language: 'en-US',
+      page: 1,
+      query,
+    };
+  }
 
-  return data.results;
+  try {
+    const response = await axios.get<TMDBResponse>('https://api.themoviedb.org/3/search/movie', requestOptions);
+
+    console.log('[movieService] TMDB response:', response.data);
+
+    return response.data.results;
+  } catch (error) {
+    console.error('[movieService] TMDB error:', error);
+    throw error;
+  }
 }
