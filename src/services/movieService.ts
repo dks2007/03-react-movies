@@ -8,36 +8,45 @@ interface TMDBResponse {
   page: number;
 }
 
+interface TMDBRequestParams {
+  include_adult: boolean;
+  language: string;
+  page: number;
+  query: string;
+}
+
+interface TMDBRequestHeaders {
+  accept: string;
+  Authorization: string;
+}
+
+interface TMDBRequestConfig {
+  params: TMDBRequestParams;
+  headers: TMDBRequestHeaders;
+}
+
 export async function fetchMovies(query: string): Promise<Movie[]> {
-  const tmdbApiKey = import.meta.env.VITE_TMDB_API_KEY;
   const tmdbAccessToken = import.meta.env.VITE_TMDB_TOKEN_API_KEY;
 
-  const requestOptions: { params?: Record<string, any>; headers: Record<string, string> } = {
+  if (!tmdbAccessToken) {
+    throw new Error('VITE_TMDB_TOKEN_API_KEY environment variable is not set');
+  }
+
+  const requestConfig: TMDBRequestConfig = {
+    params: {
+      include_adult: false,
+      language: 'en-US',
+      page: 1,
+      query,
+    },
     headers: {
       accept: 'application/json',
+      Authorization: `Bearer ${tmdbAccessToken}`,
     },
   };
 
-  if (tmdbApiKey) {
-    requestOptions.params = {
-      api_key: tmdbApiKey,
-      include_adult: false,
-      language: 'en-US',
-      page: 1,
-      query,
-    };
-  } else if (tmdbAccessToken) {
-    requestOptions.headers.Authorization = `Bearer ${tmdbAccessToken}`;
-    requestOptions.params = {
-      include_adult: false,
-      language: 'en-US',
-      page: 1,
-      query,
-    };
-  }
-
   try {
-    const response = await axios.get<TMDBResponse>('https://api.themoviedb.org/3/search/movie', requestOptions);
+    const response = await axios.get<TMDBResponse>('https://api.themoviedb.org/3/search/movie', requestConfig);
 
     console.log('[movieService] TMDB response:', response.data);
 
